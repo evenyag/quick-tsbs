@@ -46,6 +46,7 @@ def run_cmd(cmd, name):
 def maybe_build_tsbs(paths):
     if is_file_exists(paths.data_generator_path):
         # tsbs generator exists
+        print('tsbs exists at workspace')
         return
     # Invokd script to build tsbs and move binaries to tsbs_binary_dir
     cmd = '%s/build_tsbs.sh %s %s' % (SCRIPT_DIR, TSBS_SRC_DIR, paths.tsbs_binary_dir)
@@ -74,11 +75,11 @@ def generate_tsbs_load_config(config_path, input_file):
 def generate(args):
     paths = WorkspacePaths(args.workspace)
 
+    maybe_build_tsbs(paths)
+
     output_file = '%s/%s' % (paths.workspace, BENCH_DATA_FILE)
     if args.output_name is not None:
         output_file = '%s/%s' % (paths.workspace, args.output_name)
-
-    maybe_build_tsbs(paths)
 
     if not is_file_exists(paths.data_generator_path):
         print('Try to generate data to %s' % output_file)
@@ -88,7 +89,8 @@ def generate(args):
 
 def greptime(args):
     paths = WorkspacePaths(args.workspace)
-    # TODO(yingwen): Create workspace dir.
+
+    maybe_build_tsbs(paths)
 
     input_file = '%s/%s' % (paths.workspace, BENCH_DATA_FILE)
     if args.input_name is not None:
