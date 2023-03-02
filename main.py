@@ -59,7 +59,10 @@ def generate_data(data_generator_path, output_file):
         --log-interval="10s" --format="influx" > %s' % (data_generator_path, output_file)
     run_cmd(cmd, 'Generate data')
 
-def generate_tsbs_load_config(config_path, input_file):
+def maybe_generate_tsbs_load_config(config_path, input_file):
+    if is_file_exists(config_path):
+        return
+
     # Load template
     template_path = '%s/tsbs_load.template.yaml' % CONFIG_DIR
     with open(template_path, 'r') as file:
@@ -71,6 +74,8 @@ def generate_tsbs_load_config(config_path, input_file):
     # Write yaml to config_path
     with open(config_path, 'w') as file:
         yaml.dump(config, file)
+
+    print('generate config to %s' % config_path)
 
 def generate(args):
     paths = WorkspacePaths(args.workspace)
@@ -97,8 +102,7 @@ def greptime(args):
         input_file = '%s/%s' % (paths.workspace, args.input_name)
 
     print('input file is %s' % input_file)
-    generate_tsbs_load_config(paths.tsbs_load_config_path, input_file)
-    print('generate config to %s' % paths.tsbs_load_config_path)
+    maybe_generate_tsbs_load_config(paths.tsbs_load_config_path, input_file)
 
 if __name__ == '__main__':
     # Instantiate the parser
