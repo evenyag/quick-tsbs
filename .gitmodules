@@ -1,3 +1,4 @@
 [submodule "tsbs"]
 	path = tsbs
 	url = https://github.com/evenyag/tsbs.git
+	branch = feat/greptimedb
