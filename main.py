@@ -5,6 +5,7 @@ import argparse
 import os
 import sys
 import subprocess
+import yaml
 
 from pathlib import Path
 
@@ -14,6 +15,9 @@ DEFAULT_WORKSPACE = '%s/workspace' % CWD
 PROJECT_DIR = os.path.dirname(os.path.realpath(__file__))
 TSBS_SRC_DIR = '%s/tsbs' % PROJECT_DIR
 SCRIPT_DIR = '%s/scripts' % PROJECT_DIR
+CONFIG_DIR = '%s/config' % PROJECT_DIR
+# Default bench data file name.
+BENCH_DATA_FILE = 'bench-data.lp'
 
 class WorkspacePaths(object):
     def __init__(self, workspace):
@@ -21,6 +25,7 @@ class WorkspacePaths(object):
         self.binary_dir = '%s/bin' % workspace
         self.tsbs_binary_dir = '%s/tsbs' % self.binary_dir
         self.data_generator_path = '%s/tsbs_generate_data' % self.tsbs_binary_dir
+        self.tsbs_load_config_path = '%s/tsbs_load.yaml' % workspace
 
 def is_file_exists(path):
     file = Path(path)
@@ -53,20 +58,45 @@ def generate_data(data_generator_path, output_file):
         --log-interval="10s" --format="influx" > %s' % (data_generator_path, output_file)
     run_cmd(cmd, 'Generate data')
 
+def generate_tsbs_load_config(config_path, input_file):
+    # Load template
+    template_path = '%s/tsbs_load.template.yaml' % CONFIG_DIR
+    with open(template_path, 'r') as file:
+        config = yaml.safe_load(file)
+
+    # Overwrite template
+    config['data-source']['file'] = input_file
+
+    # Write yaml to config_path
+    with open(config_path, 'w') as file:
+        yaml.dump(config, file)
+
 def generate(args):
     paths = WorkspacePaths(args.workspace)
 
-    output_file = '%s/bench-data.lp' % paths.workspace
+    output_file = '%s/%s' % (paths.workspace, BENCH_DATA_FILE)
     if args.output_name is not None:
         output_file = '%s/%s' % (paths.workspace, args.output_name)
 
     maybe_build_tsbs(paths)
 
-    print('Try to generate data to %s' % output_file)
-    generate_data(paths.data_generator_path, output_file)
+    if not is_file_exists(paths.data_generator_path):
+        print('Try to generate data to %s' % output_file)
+        generate_data(paths.data_generator_path, output_file)
+    else:
+        print('%s already exists' % output_file)
 
 def greptime(args):
-    print(args)
+    paths = WorkspacePaths(args.workspace)
+    # TODO(yingwen): Create workspace dir.
+
+    input_file = '%s/%s' % (paths.workspace, BENCH_DATA_FILE)
+    if args.input_name is not None:
+        input_file = '%s/%s' % (paths.workspace, args.input_name)
+
+    print('input file is %s' % input_file)
+    generate_tsbs_load_config(paths.tsbs_load_config_path, input_file)
+    print('generate config to %s' % paths.tsbs_load_config_path)
 
 if __name__ == '__main__':
     # Instantiate the parser
@@ -81,7 +111,7 @@ if __name__ == '__main__':
 
     # Parser for the "greptime" command
     greptime_parser = subparsers.add_parser('greptime', help='greptime help')
-    generate_parser.add_argument('--input-name', help='input data file name')
+    greptime_parser.add_argument('--input-name', help='input data file name')
     greptime_parser.set_defaults(func=greptime)
 
     if len(sys.argv) == 1:
