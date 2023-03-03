@@ -86,7 +86,7 @@ def generate(args):
     if args.output_name is not None:
         output_file = '%s/%s' % (paths.workspace, args.output_name)
 
-    if not is_file_exists(paths.data_generator_path):
+    if not is_file_exists(output_file):
         print('Try to generate data to %s' % output_file)
         generate_data(paths.data_generator_path, output_file)
     else:
