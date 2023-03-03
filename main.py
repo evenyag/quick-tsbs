@@ -25,7 +25,8 @@ class WorkspacePaths(object):
         self.binary_dir = '%s/bin' % workspace
         self.tsbs_binary_dir = '%s/tsbs' % self.binary_dir
         self.data_generator_path = '%s/tsbs_generate_data' % self.tsbs_binary_dir
-        self.tsbs_load_greptime = '%s/tsbs_load_greptime.yaml' % workspace
+        self.greptime_loader = '%s/tsbs_load_greptime' % self.tsbs_binary_dir
+        self.tsbs_load_greptime_config = '%s/tsbs_load_greptime_config.yaml' % workspace
 
 class BenchConfig(object):
     def __init__(self, input_file):
@@ -55,7 +56,7 @@ def is_file_exists(path):
     file = Path(path)
     return file.exists()
 
-def run_cmd(cmd, name):
+def run_cmd(cmd, name=""):
     print('Try to run command: %s' % cmd)
     with subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
         print('%s start...' % name)
@@ -118,10 +119,10 @@ def config_tsbs_load_for_greptime(config_path, input_file):
 
     return bench_config
 
-def bench_greptime(tsbs_load_greptime, bench_config):
-    cmd = '%s --urls=%s --file=%s --batch-size=%s --gzip=%s --workers=%s' % (tsbs_load_greptime,
+def bench_greptime(greptime_loader, bench_config):
+    cmd = '%s --urls=%s --file=%s --batch-size=%s --gzip=%s --workers=%s' % (greptime_loader,
         bench_config.urls, bench_config.file, bench_config.batch_size, bench_config.gzip, bench_config.workers)
-    run_cmd(cmd)
+    run_cmd(cmd, "Bench greptimedb")
 
 def generate(args):
     paths = WorkspacePaths(args.workspace)
@@ -148,9 +149,9 @@ def greptime(args):
         input_file = '%s/%s' % (paths.workspace, args.input_name)
 
     print('input file is %s' % input_file)
-    bench_config = config_tsbs_load_for_greptime(paths.tsbs_load_greptime, input_file)
+    bench_config = config_tsbs_load_for_greptime(paths.tsbs_load_greptime_config, input_file)
 
-    bench_greptime(paths.tsbs_load_greptime, bench_config)
+    bench_greptime(paths.greptime_loader, bench_config)
 
 if __name__ == '__main__':
     # Instantiate the parser
