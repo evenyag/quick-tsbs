@@ -13,8 +13,10 @@ mkdir -p $2
 # Enter tsbs source directory.
 pushd $1
 # Build tsbs.
-make
+make -j4
 # Move all binaries to target directory.
 mv ./bin/* $2
+# Remove bin directory
+rmdir ./bin
 # Exit tsbs directory.
 popd

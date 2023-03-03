@@ -121,7 +121,7 @@ def config_tsbs_load_for_greptime(config_path, input_file):
 
 def bench_greptime(greptime_loader, bench_config):
     cmd = '%s --urls=%s --file=%s --batch-size=%s --gzip=%s --workers=%s' % (greptime_loader,
-        bench_config.urls, bench_config.file, bench_config.batch_size, bench_config.gzip, bench_config.workers)
+        bench_config.urls, bench_config.file, bench_config.batch_size, str(bench_config.gzip).lower(), bench_config.workers)
     run_cmd(cmd, "Bench greptimedb")
 
 def generate(args):
