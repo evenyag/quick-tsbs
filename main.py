@@ -30,7 +30,7 @@ class WorkspacePaths(object):
 class BenchConfig(object):
     def __init__(self, input_file):
         self.file = input_file
-        self.urls = 'http://localhost:4000/v1/influxdb'
+        self.urls = 'http://localhost:4000'
         self.gzip = False
         self.batch_size = '100'
         self.workers = 4
@@ -79,7 +79,7 @@ def maybe_build_tsbs(paths):
 def generate_data(data_generator_path, output_file):
     cmd = '%s --use-case="cpu-only" --seed=123 --scale=4000 \
 --timestamp-start="2016-01-01T00:00:00Z" \
---timestamp-end="2016-01-01T12:00:00Z" \
+--timestamp-end="2016-01-01T06:00:00Z" \
 --log-interval="10s" --format="influx" > %s' % (data_generator_path, output_file)
     run_cmd(cmd, 'Generate data')
 
