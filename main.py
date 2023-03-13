@@ -93,12 +93,12 @@ def dump_yaml(config, path):
     with open(path, 'w') as file:
         yaml.dump(config, file)
 
-def config_tsbs_load_for_greptime(config_path, input_file):
+def config_tsbs_load_for_greptime(config_path, default_input_file):
     if is_file_exists(config_path):
         # Config file already exists
         config = load_yaml(config_path)
 
-        bench_config = BenchConfig(input_file)
+        bench_config = BenchConfig(default_input_file)
         # Read bench config from file
         bench_config.read_from_config(config)
 
@@ -109,7 +109,7 @@ def config_tsbs_load_for_greptime(config_path, input_file):
     config = load_yaml(template_path)
 
     # Overwrite template by default config.
-    bench_config = BenchConfig(input_file)
+    bench_config = BenchConfig(default_input_file)
     bench_config.write_to_config(config)
 
     # Write yaml to config_path
@@ -144,12 +144,8 @@ def greptime(args):
 
     maybe_build_tsbs(paths)
 
-    input_file = '%s/%s' % (paths.workspace, BENCH_DATA_FILE)
-    if args.input_name is not None:
-        input_file = '%s/%s' % (paths.workspace, args.input_name)
-
-    print('input file is %s' % input_file)
-    bench_config = config_tsbs_load_for_greptime(paths.tsbs_load_greptime_config, input_file)
+    default_input_file = '%s/%s' % (paths.workspace, BENCH_DATA_FILE)
+    bench_config = config_tsbs_load_for_greptime(paths.tsbs_load_greptime_config, default_input_file)
 
     bench_greptime(paths.greptime_loader, bench_config)
 
@@ -166,7 +162,6 @@ if __name__ == '__main__':
 
     # Parser for the "greptime" command
     greptime_parser = subparsers.add_parser('greptime', help='greptime help')
-    greptime_parser.add_argument('--input-name', help='input data file name')
     greptime_parser.set_defaults(func=greptime)
 
     if len(sys.argv) == 1:
