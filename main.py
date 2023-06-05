@@ -35,6 +35,8 @@ class BenchConfig(object):
         self.gzip = False
         self.batch_size = '100'
         self.workers = 4
+        self.db_name = "benchmark"
+        self.do_create_db = True
 
     def read_from_config(self, config):
         loader = config['loader']
@@ -43,6 +45,8 @@ class BenchConfig(object):
         self.gzip = loader['db-specific']['gzip']
         self.batch_size = loader['runner']['batch-size']
         self.workers = loader['runner']['workers']
+        self.db_name = loader['runner']['db-name']
+        self.do_create_db = loader['runner']['do-create-db']
 
     def write_to_config(self, config):
         loader = config['loader']
@@ -51,6 +55,8 @@ class BenchConfig(object):
         loader['db-specific']['gzip'] = self.gzip
         loader['runner']['batch-size'] = self.batch_size
         loader['runner']['workers'] = self.workers
+        loader['runner']['db-name'] = self.db_name
+        loader['runner']['do-create-db'] = self.do_create_db
 
 def is_file_exists(path):
     file = Path(path)
@@ -120,8 +126,8 @@ def config_tsbs_load_for_greptime(config_path, default_input_file):
     return bench_config
 
 def bench_greptime(greptime_loader, bench_config):
-    cmd = '%s --urls=%s --file=%s --batch-size=%s --gzip=%s --workers=%s' % (greptime_loader,
-        bench_config.urls, bench_config.file, bench_config.batch_size, str(bench_config.gzip).lower(), bench_config.workers)
+    cmd = '%s --urls=%s --file=%s --batch-size=%s --gzip=%s --workers=%s --db-name=%s --do-create-db=%s' % (greptime_loader,
+        bench_config.urls, bench_config.file, bench_config.batch_size, str(bench_config.gzip).lower(), bench_config.workers, bench_config.db_name, str(bench_config.do_create_db).lower())
     run_cmd(cmd, "Bench greptimedb")
 
 def generate(args):
